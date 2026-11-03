@@ -7,16 +7,17 @@ import persistence.RepositorioMascotas;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PruebaPersistencia {
     public static void main(String[] args) {
-        RepositorioMascotas repo = new RepositorioMascotas(Path.of("mascotas.csv"));
+        RepositorioMascotas repo = new RepositorioMascotas(Path.of("data/mascotas.csv"));
 
         // 1. Creamos 2 mascotas de prueba
         List<Mascota> listaGuardar = new ArrayList<>();
-        listaGuardar.add(new Perro("Fido", "Perro", "Macho", "2020-05-10", 12.5, "CHIP123", "Grande"));
+        listaGuardar.add(new Perro("Fido", "Perro", "Macho", LocalDate.of(2022,05,10), 12.5, "CHIP123", "Grande"));
         //listaGuardar.add(new Gato("Michi", "Gato", "Hembra", "2021-08-15", 4.2, true));
 
         try {

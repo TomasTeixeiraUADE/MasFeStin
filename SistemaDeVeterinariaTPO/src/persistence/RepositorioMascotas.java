@@ -2,14 +2,14 @@ package persistence;
 import model.Mascota;
 import model.Perro;
 import model.Gato;
-import model.Aves;
+import model.Ave;
 import model.Conejo;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,12 +30,13 @@ public class RepositorioMascotas {
                         .append(m.getPesoActual());
                 if (m instanceof Perro) {
                     Perro p = (Perro) m;
-                    sb.append(";").append(p.getNumeroChip()).append(";").append(p.getTamanio());
+                    sb.append(";").append(p.getNumeroChip()).append(";")
+                            .append(p.getTamanio());
                 } else if (m instanceof Gato) {
                     Gato g = (Gato) m;
                     sb.append(";").append(g.isViveEnInterior());
-                } else if (m instanceof Aves) {
-                    Aves a = (Aves) m;
+                } else if (m instanceof Ave) {
+                    Ave a = (Ave) m;
                     sb.append(";").append(a.isPuedeVolar());
                 }
                 bw.write(sb.toString());
@@ -46,7 +47,7 @@ public class RepositorioMascotas {
 
     public List<Mascota> cargarTodas() throws IOException{
         List<Mascota> mascotas = new ArrayList<>();
-        if (Files.exists(rutaArchivo)){
+        if (!Files.exists(rutaArchivo)){
             return mascotas;
         }
 
@@ -58,7 +59,7 @@ public class RepositorioMascotas {
                     String nombre = datos[0];
                     String especie = datos[1];
                     String sexo = datos[2];
-                    String fechaNacimiento = datos[3];
+                    LocalDate fechaNacimiento = LocalDate.parse(datos[3]);
                     double pesoActual = Double.parseDouble(datos[4]);
 
                     if (especie.equalsIgnoreCase("Perro")){
@@ -67,12 +68,12 @@ public class RepositorioMascotas {
                         mascotas.add(new Perro(nombre, especie, sexo, fechaNacimiento, pesoActual, chip, tamanio));
                     } else if (especie.equalsIgnoreCase("Gato")){
                         boolean interior = Boolean.parseBoolean(datos[5]);
-                        mascotas.add(new Gato(nombre, especie, sexo, fechaNacimiento, interior));
+                        mascotas.add(new Gato(nombre, especie, sexo, fechaNacimiento,pesoActual, interior));
                     } else if (especie.equalsIgnoreCase("Ave")){
                         boolean volar = Boolean.parseBoolean(datos[5]);
-                        mascotas.add(new Ave(nombre, especie, sexo, fechaNacimiento, volar));
+                        mascotas.add(new Ave(nombre, especie, sexo, fechaNacimiento,pesoActual, volar));
                     } else if (especie.equalsIgnoreCase("Conejo")){
-                        mascotas.add(new Conejo(nombre, especie, sexo, fechaNacimiento));
+                        mascotas.add(new Conejo(nombre, especie, sexo, fechaNacimiento,pesoActual));
                     }
                 }
             }

@@ -1,4 +1,4 @@
-package src.model.enums;
+package model.enums;
 
 public enum EstadoTurno {
     PROGRAMADO,

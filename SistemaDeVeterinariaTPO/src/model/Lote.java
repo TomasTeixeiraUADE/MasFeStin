@@ -1,7 +1,7 @@
-package src.model;
+package model;
 
 import java.time.LocalDate;
-import src.exception.StockInsuficienteException;
+import exception.StockInsuficienteException;
 
 public class Lote {
     private String numero;

@@ -1,4 +1,4 @@
-package src.model;
+package model;
 
 public class Administrador extends Personal {
     public Administrador(String nombre, String apellido, String documento, String telefono) {

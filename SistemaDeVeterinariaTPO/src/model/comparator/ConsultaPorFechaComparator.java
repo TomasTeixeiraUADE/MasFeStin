@@ -1,8 +1,8 @@
-package src.model.comparator;
+package model.comparator;
 
 import java.util.Comparator;
 
-import src.model.Consulta;
+import model.Consulta;
 
 public class ConsultaPorFechaComparator
         implements Comparator<Consulta> {

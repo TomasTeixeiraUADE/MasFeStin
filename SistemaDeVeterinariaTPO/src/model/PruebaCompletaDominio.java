@@ -1,4 +1,4 @@
-package src.model;
+package model;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import src.exception.StockInsuficienteException;
-import src.model.comparator.ConsultaPorFechaComparator;
-import src.model.enums.EstadoTurno;
-import src.model.enums.TipoAtencion;
+import exception.StockInsuficienteException;
+import model.comparator.ConsultaPorFechaComparator;
+import model.enums.EstadoTurno;
+import model.enums.TipoAtencion;
 
 public class PruebaCompletaDominio {
 

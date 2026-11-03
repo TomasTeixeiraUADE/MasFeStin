@@ -1,4 +1,4 @@
-package src.model;
+package model;
 
 public class Insumo extends Producto {
     public Insumo(String codigo, String nombre, int stockMinimo) {

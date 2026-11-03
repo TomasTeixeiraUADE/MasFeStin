@@ -1,9 +1,9 @@
-package src.model;
+package model;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import src.exception.StockInsuficienteException;
+import exception.StockInsuficienteException;
 
 public abstract class Producto {
     private String codigo;

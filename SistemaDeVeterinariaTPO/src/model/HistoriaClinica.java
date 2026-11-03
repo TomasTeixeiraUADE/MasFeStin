@@ -1,10 +1,10 @@
-package src.model;
+package model;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import src.model.comparator.ConsultaPorFechaComparator;
+import model.comparator.ConsultaPorFechaComparator;
 
 public class HistoriaClinica {
     private Mascota mascota;

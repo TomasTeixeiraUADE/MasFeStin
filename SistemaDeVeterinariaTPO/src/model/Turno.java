@@ -1,9 +1,9 @@
-package src.model;
+package model;
 
 import java.time.LocalDateTime;
 
-import src.model.enums.EstadoTurno;
-import src.model.enums.TipoAtencion;
+import model.enums.EstadoTurno;
+import model.enums.TipoAtencion;
 
 public class Turno {
     private Mascota mascota;

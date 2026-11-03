@@ -1,10 +1,10 @@
-package src.model;
+package model;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import src.exception.StockInsuficienteException;
+import exception.StockInsuficienteException;
 
 public class Vacuna {
     private String nombre;
