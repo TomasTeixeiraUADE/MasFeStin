@@ -14,12 +14,17 @@ public abstract class Mascota implements Comparable<Mascota> {
 
     private Dueno dueno;
 
+    private HistoriaClinica historiaClinica;
+
     public Mascota(String nombre, String raza, String sexo, LocalDate fechaNacimiento, double pesoActual) {
         this.nombre = nombre;
         this.raza = raza;
         this.sexo = sexo;
         this.fechaNacimiento = fechaNacimiento;
         this.pesoActual = pesoActual;
+
+        this.historiaClinica =
+            new HistoriaClinica(this);
     }
 
     public String getNombre() {
@@ -70,5 +75,22 @@ public abstract class Mascota implements Comparable<Mascota> {
 
     public void asignarDueno(Dueno dueno) {
         this.dueno = dueno;
+    }
+
+    public long calcularEdadSemanas() {
+
+        long dias =
+                java.time.temporal.ChronoUnit.DAYS.between(
+                        fechaNacimiento,
+                        LocalDate.now()
+                );
+
+        return dias / 7;
+    }
+
+    public abstract String getEspecie();
+
+    public HistoriaClinica getHistoriaClinica() {
+        return historiaClinica;
     }
 }

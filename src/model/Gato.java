@@ -3,7 +3,6 @@ package src.model;
 import java.time.LocalDate;
 
 public class Gato extends Mascota {
-
     private boolean viveEnInterior;
 
     public Gato(String nombre, String raza, String sexo, LocalDate fechaNacimiento, double pesoActual, boolean viveEnInterior) {
@@ -30,5 +29,10 @@ public class Gato extends Mascota {
         return "Gato: " + getNombre()
                 + " - Raza: " + getRaza()
                 + " - Vive en: " + tipoVida;
+    }
+    
+    @Override
+    public String getEspecie() {
+        return "GATO";
     }
 }

@@ -29,4 +29,9 @@ public class Perro extends Mascota {
                 + " - Chip: " + numeroChip
                 + " - Tamaño: " + tamanio;
     }
+
+    @Override
+    public String getEspecie() {
+        return "PERRO";
+    }
 }
