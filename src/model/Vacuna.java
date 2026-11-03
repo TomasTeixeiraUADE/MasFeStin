@@ -117,4 +117,16 @@ public class Vacuna {
 
         return seleccionado;
     }
+
+    public List<String> getEspeciesAplicables() {
+        return new ArrayList<>(
+                especiesAplicables
+        );
+    }
+
+    public List<Lote> getLotes() {
+        return new ArrayList<>(
+                lotes
+        );
+    }
 }

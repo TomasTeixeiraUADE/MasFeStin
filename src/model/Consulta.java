@@ -158,4 +158,16 @@ public class Consulta {
 
         confirmada = true;
     }
+
+    public void registrarPeso(double peso) {
+        if (peso <= 0) {
+            throw new IllegalArgumentException(
+                    "El peso debe ser mayor a cero."
+            );
+        }
+
+        this.pesoDelDia = peso;
+
+        mascota.setPesoActual(peso);
+    }
 }

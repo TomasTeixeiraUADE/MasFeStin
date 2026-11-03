@@ -4,8 +4,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HistoriaClinica {
+import src.model.comparator.ConsultaPorFechaComparator;
 
+public class HistoriaClinica {
     private Mascota mascota;
 
     private List<Consulta> consultas;
@@ -36,5 +37,16 @@ public class HistoriaClinica {
         consultas.add(consulta);
 
         return consulta;
+    }
+
+    public List<Consulta> obtenerConsultasOrdenadasPorFecha() {
+
+        List<Consulta> copia = new ArrayList<>(consultas);
+
+        copia.sort(
+                new ConsultaPorFechaComparator()
+        );
+
+        return copia;
     }
 }
