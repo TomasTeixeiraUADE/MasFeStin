@@ -12,6 +12,8 @@ public abstract class Mascota implements Comparable<Mascota> {
     private LocalDate fechaNacimiento;
     private double pesoActual;
 
+    private Dueno dueno;
+
     public Mascota(String nombre, String raza, String sexo, LocalDate fechaNacimiento, double pesoActual) {
         this.nombre = nombre;
         this.raza = raza;
@@ -60,5 +62,13 @@ public abstract class Mascota implements Comparable<Mascota> {
         return this.nombre.compareToIgnoreCase(
                 otraMascota.getNombre()
         );
+    }
+
+    public Dueno getDueno() {
+        return dueno;
+    }
+
+    public void asignarDueno(Dueno dueno) {
+        this.dueno = dueno;
     }
 }
