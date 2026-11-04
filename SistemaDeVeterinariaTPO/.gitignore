@@ -28,3 +28,6 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Lotes generados por el menu ###
+data/lotes_*.csv
