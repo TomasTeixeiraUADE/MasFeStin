@@ -10,8 +10,10 @@ import java.util.Map;
 import exception.StockInsuficienteException;
 import model.Clinica;
 import model.Consulta;
+import model.Insumo;
 import model.Mascota;
 import model.Medicamento;
+import model.NotaRectificatoria;
 import model.Tratamiento;
 import model.Vacuna;
 import model.Veterinario;
@@ -77,6 +79,15 @@ public class ControladorAtencion {
         consulta.aplicarVacuna(vacuna, LocalDate.now());
     }
 
+    public void agregarInsumo(Consulta consulta, Insumo insumo, int cantidad) {
+        exigirEnCurso(consulta);
+        consulta.agregarInsumo(insumo, cantidad);
+    }
+
+    public NotaRectificatoria rectificarConsulta(Consulta consulta, String texto, Veterinario veterinario) {
+        return consulta.agregarNotaRectificatoria(texto, veterinario);
+    }
+
     public void confirmarConsulta(Consulta consulta)
             throws StockInsuficienteException {
 
@@ -97,9 +108,21 @@ public class ControladorAtencion {
             }
         }
 
+        for (Map.Entry<Insumo, Integer> entrada : consulta.getInsumosUtilizados().entrySet()) {
+            if (entrada.getKey().calcularStock() < entrada.getValue()) {
+                throw new StockInsuficienteException(
+                        "Sin stock suficiente de " + entrada.getKey().getNombre()
+                );
+            }
+        }
+
         consulta.confirmar();
 
         for (Map.Entry<Medicamento, Integer> entrada : requerido.entrySet()) {
+            entrada.getKey().consumirStock(entrada.getValue());
+        }
+
+        for (Map.Entry<Insumo, Integer> entrada : consulta.getInsumosUtilizados().entrySet()) {
             entrada.getKey().consumirStock(entrada.getValue());
         }
     }

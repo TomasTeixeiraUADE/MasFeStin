@@ -6,6 +6,7 @@ import java.util.List;
 
 import model.Clinica;
 import model.Consulta;
+import model.Insumo;
 import model.Mascota;
 import model.Tratamiento;
 import model.VacunaAplicada;
@@ -13,6 +14,7 @@ import model.enums.EstadoFactura;
 import model.pago.CalculadorFactura;
 import model.pago.Factura;
 import model.pago.ListaPrecios;
+import model.pago.NotaCredito;
 import model.pago.PoliticaPago;
 import model.pago.RepositorioFactura;
 import model.enums.TipoAtencion;
@@ -96,6 +98,15 @@ public class ControladorFacturacion {
             );
         }
 
+        for (java.util.Map.Entry<Insumo, Integer> entrada : consulta.getInsumosUtilizados().entrySet()) {
+            String nombre = entrada.getKey().getNombre();
+            factura.agregarLinea(
+                    "Insumo: " + nombre,
+                    entrada.getValue(),
+                    precios.precioProducto(nombre)
+            );
+        }
+
         return factura;
     }
 
@@ -114,11 +125,19 @@ public class ControladorFacturacion {
         return total;
     }
 
-    public void anularFactura(Factura factura) {
+    public NotaCredito anularFactura(Factura factura, String motivo) {
 
-        factura.anular();
-
+        NotaCredito nota = factura.anular(motivo);
         repositorio.guardar(factura);
+        return nota;
+    }
+
+    public void anularFactura(Factura factura) {
+        anularFactura(factura, "Corrección de factura emitida");
+    }
+
+    public List<Factura> listarFacturas() {
+        return repositorio.listar();
     }
 
     private boolean estaFacturada(Consulta consulta) {

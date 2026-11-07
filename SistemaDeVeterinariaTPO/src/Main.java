@@ -1,8 +1,11 @@
 import java.nio.file.Path;
+import java.time.LocalDate;
 
+import controller.ControladorAdministracion;
 import controller.ControladorAtencion;
 import controller.ControladorDatos;
 import controller.ControladorFacturacion;
+import controller.ControladorRegistro;
 import controller.ControladorTurnos;
 import model.Clinica;
 import model.DatosDemo;
@@ -16,6 +19,9 @@ public class Main {
         Clinica clinica = new Clinica();
 
         DatosDemo.cargar(clinica);
+
+        ControladorRegistro registro =
+                new ControladorRegistro(clinica);
 
         ControladorTurnos turnos =
                 new ControladorTurnos(clinica, clinica.getPrecios());
@@ -31,9 +37,17 @@ public class Main {
                         clinica.getPrecios()
                 );
 
+        ControladorAdministracion administracion =
+                new ControladorAdministracion(clinica);
+
         ControladorDatos datos =
                 new ControladorDatos(clinica, Path.of("data"));
 
-        new MenuConsola(clinica, turnos, atencion, facturacion, datos).iniciar();
+        // Simula el servicio externo de notificaciones al iniciar el sistema.
+        administracion.emitirRecordatorios(LocalDate.now());
+
+        new MenuConsola(
+                clinica, registro, turnos, atencion, facturacion, administracion, datos
+        ).iniciar();
     }
 }

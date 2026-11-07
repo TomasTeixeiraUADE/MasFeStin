@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 
 import model.Clinica;
 import model.Dueno;
+import model.Insumo;
 import model.Lote;
 import model.Mascota;
 import model.Medicamento;
@@ -60,6 +61,10 @@ public class ControladorDatos {
         return guardarLotes(archivoLotes(medicamento.getNombre()), medicamento.getLotes());
     }
 
+    public int guardarLotes(Insumo insumo) throws IOException {
+        return guardarLotes(archivoLotes(insumo.getNombre()), insumo.getLotes());
+    }
+
     public int guardarLotes(Vacuna vacuna) throws IOException {
         return guardarLotes(archivoLotes(vacuna.getNombre()), vacuna.getLotes());
     }
@@ -69,6 +74,14 @@ public class ControladorDatos {
                 archivoLotes(medicamento.getNombre()),
                 medicamento.getLotes(),
                 medicamento::agregarLote
+        );
+    }
+
+    public int cargarLotes(Insumo insumo) throws IOException {
+        return cargarLotes(
+                archivoLotes(insumo.getNombre()),
+                insumo.getLotes(),
+                insumo::agregarLote
         );
     }
 

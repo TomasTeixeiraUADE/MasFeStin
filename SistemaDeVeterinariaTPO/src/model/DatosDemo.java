@@ -70,6 +70,15 @@ public class DatosDemo {
         clinica.getMedicamentos().add(antiparasitario);
         clinica.getMedicamentos().add(antiinflamatorio);
 
+        Insumo jeringa = new Insumo("INS-01", "Jeringa descartable", 20);
+        jeringa.agregarLote(new Lote("J-001", hoy.plusYears(2), 50));
+
+        Insumo gasa = new Insumo("INS-02", "Gasa estéril", 15);
+        gasa.agregarLote(new Lote("G-001", hoy.plusYears(1), 12));
+
+        clinica.getInsumos().add(jeringa);
+        clinica.getInsumos().add(gasa);
+
         Vacuna antirrabica = new Vacuna("Antirrábica", 12, 365);
         antirrabica.agregarEspecie("PERRO");
         antirrabica.agregarEspecie("GATO");
@@ -86,6 +95,8 @@ public class DatosDemo {
         clinica.getPrecios().definirPrecioProducto("Amoxicilina 250mg", 1800);
         clinica.getPrecios().definirPrecioProducto("Antiparasitario", 2500);
         clinica.getPrecios().definirPrecioProducto("Antiinflamatorio", 3200);
+        clinica.getPrecios().definirPrecioProducto("Jeringa descartable", 500);
+        clinica.getPrecios().definirPrecioProducto("Gasa estéril", 800);
         clinica.getPrecios().definirPrecioProducto("Antirrábica", 6000);
         clinica.getPrecios().definirPrecioProducto("Quíntuple canina", 9000);
     }

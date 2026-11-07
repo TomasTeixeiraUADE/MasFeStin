@@ -68,6 +68,14 @@ public class Dueno {
         }
     }
 
+    public void quitarMascota(Mascota mascota) {
+        if (mascota != null && mascotas.remove(mascota)) {
+            if (mascota.getDueno() == this) {
+                mascota.asignarDueno(null);
+            }
+        }
+    }
+
     public void registrarAusencia() {
         ausenciasConsecutivas++;
     }

@@ -3,7 +3,9 @@ package model;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import exception.StockInsuficienteException;
 
@@ -21,6 +23,8 @@ public class Consulta {
 
     private List<Tratamiento> tratamientos;
     private List<VacunaAplicada> vacunasAplicadas;
+    private Map<Insumo, Integer> insumosUtilizados;
+    private List<NotaRectificatoria> notasRectificatorias;
 
     private boolean confirmada;
 
@@ -38,6 +42,9 @@ public class Consulta {
 
         this.vacunasAplicadas =
                 new ArrayList<>();
+
+        this.insumosUtilizados = new LinkedHashMap<>();
+        this.notasRectificatorias = new ArrayList<>();
 
         this.confirmada = false;
     }
@@ -86,6 +93,38 @@ public class Consulta {
         return new ArrayList<>(
                 vacunasAplicadas
         );
+    }
+
+    public Map<Insumo, Integer> getInsumosUtilizados() {
+        return new LinkedHashMap<>(insumosUtilizados);
+    }
+
+    public List<NotaRectificatoria> getNotasRectificatorias() {
+        return new ArrayList<>(notasRectificatorias);
+    }
+
+    public void agregarInsumo(Insumo insumo, int cantidad) {
+        if (confirmada) {
+            throw new IllegalStateException("La consulta ya fue confirmada.");
+        }
+        if (insumo == null) {
+            throw new IllegalArgumentException("El insumo es obligatorio.");
+        }
+        if (cantidad <= 0) {
+            throw new IllegalArgumentException("La cantidad debe ser mayor a cero.");
+        }
+        insumosUtilizados.merge(insumo, cantidad, Integer::sum);
+    }
+
+    public NotaRectificatoria agregarNotaRectificatoria(String texto, Veterinario veterinario) {
+        if (!confirmada) {
+            throw new IllegalStateException(
+                    "Solo se puede rectificar una consulta ya confirmada."
+            );
+        }
+        NotaRectificatoria nota = new NotaRectificatoria(texto, veterinario);
+        notasRectificatorias.add(nota);
+        return nota;
     }
 
     public void agregarTratamiento(Medicamento medicamento, double dosis, String frecuencia, String duracion) {

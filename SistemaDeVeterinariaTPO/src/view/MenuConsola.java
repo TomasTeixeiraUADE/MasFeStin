@@ -1,6 +1,7 @@
 package view;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -11,17 +12,27 @@ import java.util.Locale;
 import java.util.Scanner;
 import java.util.function.Function;
 
+import controller.ControladorAdministracion;
 import controller.ControladorAtencion;
 import controller.ControladorDatos;
 import controller.ControladorFacturacion;
+import controller.ControladorRegistro;
 import controller.ControladorTurnos;
 import exception.StockInsuficienteException;
+import model.Ave;
 import model.Clinica;
+import model.Conejo;
 import model.Consulta;
 import model.Dueno;
+import model.Gato;
+import model.Insumo;
 import model.Lote;
 import model.Mascota;
 import model.Medicamento;
+import model.NotaRectificatoria;
+import model.Perro;
+import model.Producto;
+import model.RecordatorioVacuna;
 import model.Turno;
 import model.Vacuna;
 import model.VacunaAplicada;
@@ -32,28 +43,36 @@ import model.pago.Debito;
 import model.pago.Efectivo;
 import model.pago.Factura;
 import model.pago.LineaFactura;
+import model.pago.NotaCredito;
 import model.pago.PoliticaPago;
 
 public class MenuConsola {
     private static final DateTimeFormatter FORMATO =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private static final DateTimeFormatter FORMATO_FECHA =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final Locale ARGENTINA = Locale.forLanguageTag("es-AR");
 
     private Clinica clinica;
+    private ControladorRegistro registro;
     private ControladorTurnos turnos;
     private ControladorAtencion atencion;
     private ControladorFacturacion facturacion;
+    private ControladorAdministracion administracion;
     private ControladorDatos datos;
     private Scanner entrada = new Scanner(System.in);
 
-    public MenuConsola(Clinica clinica, ControladorTurnos turnos,
-                       ControladorAtencion atencion,
+    public MenuConsola(Clinica clinica, ControladorRegistro registro,
+                       ControladorTurnos turnos, ControladorAtencion atencion,
                        ControladorFacturacion facturacion,
+                       ControladorAdministracion administracion,
                        ControladorDatos datos) {
         this.clinica = clinica;
+        this.registro = registro;
         this.turnos = turnos;
         this.atencion = atencion;
         this.facturacion = facturacion;
+        this.administracion = administracion;
         this.datos = datos;
     }
 
@@ -63,10 +82,12 @@ public class MenuConsola {
 
         do {
             System.out.println("\n===== CLÍNICA VETERINARIA PATITAS =====");
-            System.out.println("1. Agendar Turno");
-            System.out.println("2. Registrar Consulta Veterinaria");
-            System.out.println("3. Cobrar Factura");
-            System.out.println("4. Cargar/Guardar datos");
+            System.out.println("1. Dueños y mascotas");
+            System.out.println("2. Turnos");
+            System.out.println("3. Consultas e historia clínica");
+            System.out.println("4. Facturación");
+            System.out.println("5. Administración y alertas");
+            System.out.println("6. Cargar/Guardar datos");
             System.out.println("0. Salir");
 
             opcion = leerEntero("Opción: ");
@@ -83,15 +104,21 @@ public class MenuConsola {
         try {
             switch (opcion) {
                 case 1:
-                    menuTurnos();
+                    menuRegistro();
                     break;
                 case 2:
-                    registrarConsulta();
+                    menuTurnos();
                     break;
                 case 3:
-                    cobrarFactura();
+                    menuAtencion();
                     break;
                 case 4:
+                    menuFacturacion();
+                    break;
+                case 5:
+                    menuAdministracion();
+                    break;
+                case 6:
                     menuDatos();
                     break;
                 case 0:
@@ -109,6 +136,119 @@ public class MenuConsola {
                     "Error: fecha inválida. Usá el formato dd/MM/yyyy HH:mm "
                     + "(ejemplo: 05/11/2026 09:30)."
             );
+        }
+    }
+
+    private void menuRegistro() {
+
+        System.out.println("\n--- Dueños y mascotas ---");
+        System.out.println("1. Registrar dueño");
+        System.out.println("2. Registrar mascota");
+        System.out.println("3. Transferir mascota a otro dueño");
+        System.out.println("4. Listar dueños y mascotas");
+        System.out.println("0. Volver");
+
+        switch (leerEntero("Opción: ")) {
+            case 1:
+                registrarDueno();
+                break;
+            case 2:
+                registrarMascota();
+                break;
+            case 3:
+                transferirMascota();
+                break;
+            case 4:
+                listarDuenosMascotas();
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void registrarDueno() {
+        String nombre = leerTexto("Nombre: ");
+        String apellido = leerTexto("Apellido: ");
+        String documento = leerTexto("Documento: ");
+        String telefono = leerTexto("Teléfono: ");
+        String correo = leerTexto("Correo electrónico: ");
+        boolean plan = leerSiNo("¿Posee plan de salud animal?");
+
+        Dueno dueno = registro.registrarDueno(
+                nombre, apellido, documento, telefono, correo, plan
+        );
+
+        System.out.println("Dueño registrado: " + dueno.obtenerNombreCompleto());
+    }
+
+    private void registrarMascota() {
+        Dueno dueno = elegir("Dueño responsable", clinica.getDuenos(), Dueno::obtenerNombreCompleto);
+        if (dueno == null) {
+            return;
+        }
+
+        String nombre = leerTexto("Nombre de la mascota: ");
+        String raza = leerTexto("Raza: ");
+        String sexo = leerTexto("Sexo: ");
+        LocalDate nacimiento = LocalDate.parse(
+                leerTexto("Fecha de nacimiento (dd/MM/yyyy): "), FORMATO_FECHA
+        );
+        double peso = leerDecimal("Peso actual en kg: ");
+
+        System.out.println("Especie: 1. Perro  2. Gato  3. Ave  4. Conejo");
+        int especie = leerEntero("Opción: ");
+
+        Mascota mascota;
+
+        switch (especie) {
+            case 1:
+                mascota = new Perro(
+                        nombre, raza, sexo, nacimiento, peso,
+                        leerTexto("Número de chip: "),
+                        leerTexto("Tamaño (Pequeño/Mediano/Grande): ")
+                );
+                break;
+            case 2:
+                mascota = new Gato(
+                        nombre, raza, sexo, nacimiento, peso,
+                        leerSiNo("¿Vive en interior?")
+                );
+                break;
+            case 3:
+                mascota = new Ave(
+                        nombre, raza, sexo, nacimiento, peso,
+                        leerSiNo("¿Puede volar?")
+                );
+                break;
+            case 4:
+                mascota = new Conejo(nombre, raza, sexo, nacimiento, peso);
+                break;
+            default:
+                System.out.println("Especie inválida.");
+                return;
+        }
+
+        registro.registrarMascota(dueno, mascota);
+        System.out.println("Mascota registrada: " + describir(mascota));
+    }
+
+    private void transferirMascota() {
+        Mascota mascota = elegir("Mascota a transferir", clinica.getMascotas(), this::describir);
+        Dueno nuevo = elegir("Nuevo dueño", clinica.getDuenos(), Dueno::obtenerNombreCompleto);
+        if (mascota == null || nuevo == null) {
+            return;
+        }
+        registro.transferirMascota(mascota, nuevo);
+        System.out.println("Transferencia realizada. La historia clínica se conserva.");
+    }
+
+    private void listarDuenosMascotas() {
+        for (Dueno dueno : clinica.getDuenos()) {
+            System.out.println("- " + dueno.obtenerNombreCompleto()
+                    + " | plan: " + (dueno.isPoseePlanSalud() ? "sí" : "no"));
+            for (Mascota mascota : dueno.getMascotas()) {
+                System.out.println("    * " + mascota.obtenerDatos());
+            }
         }
     }
 
@@ -293,6 +433,79 @@ public class MenuConsola {
         return elegir("Turno", todos, this::describir);
     }
 
+    private void menuAtencion() {
+
+        System.out.println("\n--- Consultas e historia clínica ---");
+        System.out.println("1. Registrar o continuar consulta");
+        System.out.println("2. Agregar nota rectificatoria a una consulta confirmada");
+        System.out.println("3. Consultar historia clínica de una mascota");
+        System.out.println("0. Volver");
+
+        switch (leerEntero("Opción: ")) {
+            case 1:
+                registrarConsulta();
+                break;
+            case 2:
+                rectificarConsulta();
+                break;
+            case 3:
+                verHistoriaClinica();
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void rectificarConsulta() {
+        List<Consulta> confirmadas = new ArrayList<>();
+        for (Mascota mascota : clinica.getMascotas()) {
+            for (Consulta consulta : mascota.getHistoriaClinica().getConsultas()) {
+                if (consulta.isConfirmada()) {
+                    confirmadas.add(consulta);
+                }
+            }
+        }
+
+        Consulta consulta = elegir("Consulta confirmada", confirmadas, this::describir);
+        Veterinario veterinario = elegir(
+                "Veterinario que firma la rectificación",
+                clinica.getVeterinarios(),
+                this::describir
+        );
+
+        if (consulta == null || veterinario == null) {
+            return;
+        }
+
+        NotaRectificatoria nota = atencion.rectificarConsulta(
+                consulta, leerTexto("Texto de la rectificación: "), veterinario
+        );
+
+        System.out.println("Nota agregada y firmada por " + nota.getFirma());
+    }
+
+    private void verHistoriaClinica() {
+        Mascota mascota = elegir("Mascota", clinica.getMascotas(), this::describir);
+        if (mascota == null) {
+            return;
+        }
+
+        List<Consulta> consultas = mascota.getHistoriaClinica().obtenerConsultasOrdenadasPorFecha();
+        if (consultas.isEmpty()) {
+            System.out.println("La mascota todavía no tiene consultas registradas.");
+            return;
+        }
+
+        for (Consulta consulta : consultas) {
+            System.out.println("- " + describir(consulta));
+            System.out.println("  Diagnóstico: " + consulta.getDiagnostico());
+            for (NotaRectificatoria nota : consulta.getNotasRectificatorias()) {
+                System.out.println("  RECTIFICACIÓN: " + nota.getTexto()
+                        + " | " + nota.getFirma());
+            }
+        }
+    }
+
     private void registrarConsulta() {
 
         System.out.println("\n--- Consulta veterinaria ---");
@@ -351,8 +564,9 @@ public class MenuConsola {
             );
             System.out.println("1. Agregar tratamiento");
             System.out.println("2. Agregar vacuna");
-            System.out.println("3. Registrar o corregir peso del día");
-            System.out.println("4. Confirmar consulta");
+            System.out.println("3. Agregar insumo utilizado");
+            System.out.println("4. Registrar o corregir peso del día");
+            System.out.println("5. Confirmar consulta");
             System.out.println("0. Salir (la consulta queda sin confirmar)");
 
             opcion = leerEntero("Opción: ");
@@ -366,13 +580,16 @@ public class MenuConsola {
                         agregarVacuna(consulta);
                         break;
                     case 3:
+                        agregarInsumo(consulta);
+                        break;
+                    case 4:
                         atencion.registrarPeso(
                                 consulta,
                                 leerDecimal("Peso del día en kg: ")
                         );
                         System.out.println("Peso registrado.");
                         break;
-                    case 4:
+                    case 5:
                         atencion.confirmarConsulta(consulta);
                         System.out.println(
                                 "Consulta confirmada y guardada en la historia clínica. "
@@ -409,6 +626,16 @@ public class MenuConsola {
         System.out.println("Tratamiento agregado.");
     }
 
+    private void agregarInsumo(Consulta consulta) {
+        Insumo insumo = elegir("Insumo", clinica.getInsumos(), this::describir);
+        if (insumo == null) {
+            return;
+        }
+        int cantidad = leerEntero("Cantidad utilizada: ");
+        atencion.agregarInsumo(consulta, insumo, cantidad);
+        System.out.println("Insumo agregado a la consulta. Se descontará al confirmar.");
+    }
+
     private void agregarVacuna(Consulta consulta) throws StockInsuficienteException {
 
         Vacuna vacuna = elegir("Vacuna", clinica.getVacunas(), this::describir);
@@ -425,6 +652,68 @@ public class MenuConsola {
                 "Vacuna agregada. Próximo refuerzo: "
                 + aplicadas.get(aplicadas.size() - 1).getFechaProximoRefuerzo()
         );
+    }
+
+    private void menuFacturacion() {
+        System.out.println("\n--- Facturación ---");
+        System.out.println("1. Emitir y cobrar factura");
+        System.out.println("2. Listar facturas");
+        System.out.println("3. Anular factura con nota de crédito");
+        System.out.println("0. Volver");
+
+        switch (leerEntero("Opción: ")) {
+            case 1:
+                cobrarFactura();
+                break;
+            case 2:
+                listarFacturas();
+                break;
+            case 3:
+                anularFactura();
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void listarFacturas() {
+        List<Factura> facturas = facturacion.listarFacturas();
+        if (facturas.isEmpty()) {
+            System.out.println("No hay facturas registradas.");
+            return;
+        }
+        for (Factura factura : facturas) {
+            System.out.println("Factura N° " + factura.getNumero()
+                    + " | " + factura.getFecha()
+                    + " | " + factura.getEstado()
+                    + " | total " + plata(factura.calcularTotal()));
+            if (factura.getNotaCredito() != null) {
+                System.out.println("  Nota de crédito " + factura.getNotaCredito().getNumero()
+                        + " - motivo: " + factura.getNotaCredito().getMotivo());
+            }
+        }
+    }
+
+    private void anularFactura() {
+        List<Factura> pagadas = new ArrayList<>();
+        for (Factura factura : facturacion.listarFacturas()) {
+            if (factura.getEstado() == model.enums.EstadoFactura.PAGADA) {
+                pagadas.add(factura);
+            }
+        }
+
+        Factura factura = elegir(
+                "Factura pagada", pagadas,
+                f -> "N° " + f.getNumero() + " - " + plata(f.calcularTotal())
+        );
+        if (factura == null) {
+            return;
+        }
+
+        String motivo = leerTexto("Motivo de la anulación: ");
+        NotaCredito nota = facturacion.anularFactura(factura, motivo);
+        System.out.println("Factura anulada. Se emitió " + nota.getNumero()
+                + " por " + plata(nota.getImporte()));
     }
 
     private void cobrarFactura() {
@@ -510,6 +799,72 @@ public class MenuConsola {
         }
     }
 
+    private void menuAdministracion() {
+        System.out.println("\n--- Administración y alertas ---");
+        System.out.println("1. Consultar agenda de un veterinario");
+        System.out.println("2. Consultar productos con stock bajo");
+        System.out.println("3. Consultar vacunas próximas a refuerzo");
+        System.out.println("4. Consultar vacunas vencidas (+30 días)");
+        System.out.println("5. Emitir recordatorios de refuerzo");
+        System.out.println("0. Volver");
+
+        switch (leerEntero("Opción: ")) {
+            case 1:
+                verAgenda();
+                break;
+            case 2:
+                verStockBajo();
+                break;
+            case 3:
+                verVacunasProximas();
+                break;
+            case 4:
+                verVacunasVencidas();
+                break;
+            case 5:
+                int cantidad = administracion.emitirRecordatorios(LocalDate.now());
+                System.out.println("Recordatorios emitidos: " + cantidad);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void verStockBajo() {
+        List<Producto> productos = administracion.productosConStockBajo();
+        if (productos.isEmpty()) {
+            System.out.println("No hay productos con stock bajo.");
+            return;
+        }
+        for (Producto producto : productos) {
+            System.out.println("- " + producto.getNombre()
+                    + " | stock: " + producto.calcularStock()
+                    + " | mínimo: " + producto.getStockMinimo());
+        }
+    }
+
+    private void verVacunasProximas() {
+        List<RecordatorioVacuna> lista = administracion.vacunasProximasARefuerzo(LocalDate.now());
+        if (lista.isEmpty()) {
+            System.out.println("No hay refuerzos dentro de los próximos 7 días.");
+            return;
+        }
+        for (RecordatorioVacuna recordatorio : lista) {
+            System.out.println("- " + recordatorio.descripcion(LocalDate.now()));
+        }
+    }
+
+    private void verVacunasVencidas() {
+        List<RecordatorioVacuna> lista = administracion.vacunasVencidas(LocalDate.now());
+        if (lista.isEmpty()) {
+            System.out.println("No hay vacunas vencidas por atraso mayor a 30 días.");
+            return;
+        }
+        for (RecordatorioVacuna recordatorio : lista) {
+            System.out.println("- " + recordatorio.descripcion(LocalDate.now()));
+        }
+    }
+
     private void menuDatos() {
 
         System.out.println("\n--- Datos ---");
@@ -544,6 +899,8 @@ public class MenuConsola {
             System.out.println(
                     "Error: no se pudo completar la operación: " + e.getMessage()
             );
+        } finally {
+            System.out.println("Operación de archivos finalizada.");
         }
     }
 
@@ -575,7 +932,7 @@ public class MenuConsola {
 
     private void lotes(boolean guardar) throws IOException {
 
-        System.out.println("1. Medicamento  2. Vacuna");
+        System.out.println("1. Medicamento  2. Insumo  3. Vacuna");
 
         int tipo = leerEntero("Opción: ");
 
@@ -597,6 +954,20 @@ public class MenuConsola {
             }
 
         } else if (tipo == 2) {
+
+            Insumo insumo = elegir("Insumo", clinica.getInsumos(), this::describir);
+
+            if (insumo == null) {
+                return;
+            }
+
+            if (guardar) {
+                cantidad = datos.guardarLotes(insumo);
+            } else {
+                cantidad = datos.cargarLotes(insumo);
+            }
+
+        } else if (tipo == 3) {
 
             Vacuna vacuna = elegir("Vacuna", clinica.getVacunas(), this::describir);
 
@@ -682,6 +1053,11 @@ public class MenuConsola {
 
         return medicamento.getNombre()
                 + " (stock " + medicamento.calcularStock() + alerta + ")";
+    }
+
+    private String describir(Insumo insumo) {
+        String alerta = insumo.tieneStockBajo() ? " - STOCK BAJO" : "";
+        return insumo.getNombre() + " (stock " + insumo.calcularStock() + alerta + ")";
     }
 
     private String describir(Vacuna vacuna) {

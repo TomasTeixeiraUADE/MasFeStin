@@ -12,6 +12,7 @@ public class Clinica {
     private List<Veterinario> veterinarios = new ArrayList<>();
     private List<Turno> turnos = new ArrayList<>();
     private List<Medicamento> medicamentos = new ArrayList<>();
+    private List<Insumo> insumos = new ArrayList<>();
     private List<Vacuna> vacunas = new ArrayList<>();
 
     private RepositorioFacturaMemoria facturas = new RepositorioFacturaMemoria();
@@ -35,6 +36,10 @@ public class Clinica {
 
     public List<Medicamento> getMedicamentos() {
         return medicamentos;
+    }
+
+    public List<Insumo> getInsumos() {
+        return insumos;
     }
 
     public List<Vacuna> getVacunas() {

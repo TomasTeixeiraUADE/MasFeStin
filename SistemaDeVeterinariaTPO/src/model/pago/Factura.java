@@ -17,6 +17,7 @@ public class Factura {
 
     private double total;
     private String medioPago;
+    private NotaCredito notaCredito;
 
     public Factura(int numero, LocalDate fecha, Consulta consulta) {
         this.numero = numero;
@@ -49,6 +50,10 @@ public class Factura {
 
     public List<LineaFactura> getLineas() {
         return new ArrayList<>(lineas);
+    }
+
+    public NotaCredito getNotaCredito() {
+        return notaCredito;
     }
 
     public void agregarLinea(String descripcion, int cantidad, double precioUnitario) {
@@ -95,7 +100,7 @@ public class Factura {
         this.estado = EstadoFactura.PAGADA;
     }
 
-    public void anular() {
+    public NotaCredito anular(String motivo) {
 
         if (estado != EstadoFactura.PAGADA) {
             throw new IllegalStateException(
@@ -103,6 +108,12 @@ public class Factura {
             );
         }
 
+        this.notaCredito = new NotaCredito(this, motivo);
         estado = EstadoFactura.ANULADA;
+        return notaCredito;
+    }
+
+    public void anular() {
+        anular("Corrección de factura emitida");
     }
 }

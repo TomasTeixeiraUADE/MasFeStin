@@ -40,6 +40,16 @@ public class VacunaAplicada {
         return lote;
     }
 
+    public boolean debeEmitirRecordatorio(LocalDate hoy) {
+        LocalDate inicioRecordatorio = fechaProximoRefuerzo.minusDays(7);
+        return !hoy.isBefore(inicioRecordatorio)
+                && !hoy.isAfter(fechaProximoRefuerzo);
+    }
+
+    public boolean estaVencida(LocalDate hoy) {
+        return hoy.isAfter(fechaProximoRefuerzo.plusDays(30));
+    }
+
     public void confirmarAplicacion()
             throws StockInsuficienteException {
 
